@@ -63,8 +63,6 @@ def main():
     #print (rxBuffer)
 
 
-   
-
     # Encerra comunicação
     print("-------------------------")
     print("Comunicação encerrada")
