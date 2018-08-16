@@ -40,28 +40,38 @@ def main():
     #verificar que a comunicação foi aberta
     print("comunicação aberta")
 
-
-    # a seguir ha um exemplo de dados sendo carregado para transmissao
-    # voce pode criar o seu carregando os dados de uma imagem. Tente descobrir
-    #como fazer isso
-    print ("gerando dados para transmissao :")
-
+    # Atualiza dados da transmissão
+    # txSize = com.tx.getStatus()
 
     # Faz a recepção dos dados
     print ("Recebendo dados .... ")
-
-    bytesSeremLidos=com.rx.getBufferLen()
-    print(bytesSeremLidos)
-
-    rxBuffer, nRx = com.getData(11813)
+    parte_buffer=[]
+    buffer_completo=[]
+    while True:
+        bytesSeremLidos=com.rx.getBufferLen()
+        if bytesSeremLidos>0:
+            start = time.time()
+            passrxBuffer, nRx = com.getData(1)
+            parte_buffer.append(passrxBuffer)
+        else:
+            if len(parte_buffer)>0:
+                if len(parte_buffer)==512:
+                    buffer_completo += parte_buffer
+                    parte_buffer=[]
+                else:
+                    buffer_completo+=parte_buffer
+                    if len(buffer_completo)>0:
+                        print(b''.join(buffer_completo),len(buffer_completo),"Tempo de recebimento da informação em segundos:{}".format(time.time() - start))
+                        img = b''.join(buffer_completo)
+                        buffer_completo=[]
+                        parte_buffer=[]
+    #print(bytesSeremLidos)
 
     # log
     print ("Lido              {} bytes ".format(nRx))
-    newFile = open("newpicture.jpg", "wb")
-    newFile.write(rxBuffer)
+    newFile = open("novoarquivo.jpg", "wb")
+    newFile.write(img)
     newFile.close()
-    #print (rxBuffer)
-
 
     # Encerra comunicação
     print("-------------------------")

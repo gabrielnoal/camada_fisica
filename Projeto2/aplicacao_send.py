@@ -30,7 +30,7 @@ print("porta COM aberta com sucesso")
 
 
 
-def main():
+def main(fileName):
     # Inicializa enlace ... variavel com possui todos os metodos e propriedades do enlace, que funciona em threading
     com = enlace(serialName)
 
@@ -41,11 +41,22 @@ def main():
     print("comunicação aberta")
 
 
-    # Gera dados para Transmissao
+    # a seguir ha um exemplo de dados sendo carregado para transmissao
+    # voce pode criar o seu carregando os dados de uma imagem. Tente descobrir
+    #como fazer isso
+
+    ListTxBuffer =list()
+    # for x in range(0,2):
+    #     ListTxBuffer.append(x)
+    # txBuffer = bytes(ListTxBuffer)
+    # txLen    = len(txBuffer)
+    # print(txBuffer)
+
+
     print ("gerando dados para transmissao :")
 
-
-    txBuffer = open("picture.jpg", "rb").read()
+    #
+    txBuffer = open(fileName, "rb").read()
     txLen    = len(txBuffer)
     print(txLen)
 
@@ -57,7 +68,6 @@ def main():
     # Atualiza dados da transmissão
     txSize = com.tx.getStatus()
 
-
     # Encerra comunicação
     print("-------------------------")
     print("Comunicação encerrada")
@@ -66,4 +76,5 @@ def main():
 
     #so roda o main quando for executado do terminal ... se for chamado dentro de outro modulo nao roda
 if __name__ == "__main__":
-    main()
+    fileName = "índice.png"
+    main(fileName)
