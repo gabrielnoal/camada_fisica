@@ -81,50 +81,7 @@ class Application:
           
   
         else:
-            """Inicia o primeiro container"""
-            self.primeiroContainer = Frame(master)
-            self.primeiroContainer["pady"] = 5
-            self.primeiroContainer.pack()
-
-            self.titulo = Label(self.primeiroContainer, text="Aplicação Recebe")
-            self.titulo["font"] = ("Arial", "10", "bold")
-            self.titulo.pack()
-            """Finaliza o primeiro container"""
-
-            """Inicia o segundo container"""
-            self.segundoContainer = Frame(master)
-            self.segundoContainer["padx"] = 20
-            self.segundoContainer.pack()
-
-            self.arquivoLabel = Label(self.segundoContainer,text="Aperte o botão para receber o arquivo", font=self.fontePadrao)
-            self.arquivoLabel.pack()
-            """Finaliza o segundo container"""
-
-            """Inicia o terceiro container"""
-            self.terceiroContainer = Frame(master)
-            self.terceiroContainer["padx"] = 20
-            self.terceiroContainer.pack()
-
-
-            self.campoTexto = Entry(self.terceiroContainer)
-            self.campoTexto.insert(END,"Nenhum arquivo recebido")
-            self.campoTexto["state"] = DISABLED
-            self.campoTexto["width"] = 30
-            self.campoTexto["font"] = self.fontePadrao
-            self.campoTexto.pack(side=LEFT)
-            """Finaliza o terceiro container"""
-
-            """Inicia o quarto container"""
-            self.quartoContainer = Frame(master)
-            self.quartoContainer["pady"] = 10
-            self.quartoContainer.pack()
-
-            self.buttonSend = Button(self.quartoContainer,command=self.recieveFile)
-            self.buttonSend["text"] = "Receber Arquivo"
-            self.buttonSend["font"] = self.fontePadrao
-            self.buttonSend["width"] = 12
-            self.buttonSend.pack()
-            """Finaliza o quarto container"""
+            self.recieveFile()
 
     def selectFile(self):
         self.campoTexto["state"] = NORMAL
@@ -141,11 +98,7 @@ class Application:
         pass
     
     def recieveFile(self):
-        tempo = aplicacao_receive.main()
-        self.campoTexto["state"] = NORMAL
-        self.campoTexto.delete(0,'end')
-        self.campoTexto.insert(END,"Tempo de recebimento: "+str(tempo))
-        self.campoTexto["state"] = DISABLED
+        aplicacao_receive.main()
         pass
 
 
