@@ -28,7 +28,7 @@ serialName = "/dev/ttyACM0"           # Ubuntu (variacao de)
 
 print("porta COM aberta com sucesso")
 
-
+    
 
 def main():
     # Inicializa enlace ... variavel com possui todos os metodos e propriedades do enlace, que funciona em threading
@@ -61,7 +61,8 @@ def main():
                 else:
                     buffer_completo+=parte_buffer
                     if len(buffer_completo)>0:
-                        print(b''.join(buffer_completo),len(buffer_completo),"Tempo de recebimento da informação em segundos:{}".format(time.time() - start))
+                        tempoRecebimento = time.time() - start
+                        print(b''.join(buffer_completo),len(buffer_completo),"Tempo de recebimento da informação em segundos:{}".format(tempoRecebimento))
                         img = b''.join(buffer_completo)
                         buffer_completo=[]
                         parte_buffer=[]
@@ -78,7 +79,9 @@ def main():
     print("Comunicação encerrada")
     print("-------------------------")
     com.disable()
+    return tempoRecebimento
+
 
     #so roda o main quando for executado do terminal ... se for chamado dentro de outro modulo nao roda
-if __name__ == "__main__":
-    main()
+#if __name__ == "__main__":
+#    main()

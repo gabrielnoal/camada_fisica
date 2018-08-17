@@ -7,8 +7,8 @@
 #  Aplicação
 ####################################################
 
-from aplicacao_receive import *
-from aplicacao_send import *
+import aplicacao_receive
+import aplicacao_send
 import time
 from tkinter import filedialog
 from tkinter import*
@@ -19,6 +19,7 @@ from tkinter import*
 class Application:
     def __init__(self, app, master=None):
         self.app = app
+        self.filePath = ""
         self.filename = ""
         self.fontePadrao = ("Arial", "10")
 
@@ -95,7 +96,7 @@ class Application:
             self.segundoContainer["padx"] = 20
             self.segundoContainer.pack()
 
-            self.arquivoLabel = Label(self.segundoContainer,text="Arquivo recebido", font=self.fontePadrao)
+            self.arquivoLabel = Label(self.segundoContainer,text="Aperte o botão para receber o arquivo", font=self.fontePadrao)
             self.arquivoLabel.pack()
             """Finaliza o segundo container"""
 
@@ -127,22 +128,23 @@ class Application:
 
     def selectFile(self):
         self.campoTexto["state"] = NORMAL
-        filePath = filedialog.askopenfilename(initialdir = "./",title = "Select file",filetypes = (("all files","*"),("all files","*.*")))
+        self.filePath = filedialog.askopenfilename(initialdir = "./",title = "Select file",filetypes = (("all files","*"),("all files","*.*")))
         self.campoTexto.delete(0,'end')
-        filename = filePath.split("/")
+        filename = self.filePath.split("/")
         self.filename = filename[-1]
         self.campoTexto.insert(END,self.filename)
         self.campoTexto["state"] = DISABLED
         pass
 
     def sendFile(self):
-        aplicacao_send(self.filename)
+        aplicacao_send.main(self.filePath)
         pass
     
     def recieveFile(self):
+        tempo = aplicacao_receive.main()
         self.campoTexto["state"] = NORMAL
         self.campoTexto.delete(0,'end')
-        self.campoTexto.insert(END,"lalala")
+        self.campoTexto.insert(END,"Tempo de recebimento: "+str(tempo))
         self.campoTexto["state"] = DISABLED
         pass
 
@@ -162,6 +164,5 @@ while True:
 
 
 root = Tk()
-
 Application(app,root)
 root.mainloop()

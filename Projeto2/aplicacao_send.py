@@ -75,6 +75,6 @@ def main(fileName):
     com.disable()
 
     #so roda o main quando for executado do terminal ... se for chamado dentro de outro modulo nao roda
-if __name__ == "__main__":
-    fileName = "índice.png"
-    main(fileName)
+#if __name__ == "__main__":
+#    fileName = "índice.png"
+#    main(fileName)
