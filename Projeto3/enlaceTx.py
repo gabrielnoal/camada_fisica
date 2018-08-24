@@ -30,6 +30,7 @@ class TX(object):
         self.threadMutex = False
         self.threadStop  = False
         self.package     = None
+        self.EOP         = self.EOP()
 
     def thread(self):
         """ TX thread, to send data in parallel with the code
@@ -63,18 +64,24 @@ class TX(object):
         """
         self.threadMutex = True
 
-    def createHEAD(self, headsize, payloadsize):
+    def calcOverHead(self):
+        
+        
+    def createHEAD(self, headsize, payloadsize, EOPsize):
+        head_bytes = None
+        overhead = (headsize + payloadsize + EOPsize)/payloadsize
+        head_bytes = (overHead).to_bytes(headsize, bitesorder="BIG")
         head_bytes = (payloadsize).to_bytes(headsize, bitesorder="BIG")
         return head_bytes
 
 
-    def EOP(self):
+    def createEOP(self):
         str = "NOAL"
         EOPbytes = str.encode(str)
         return EOPbytes
 
-    def createPACKAGE(self, head, payload, EOP):
-        self.package = numpy.concatenate(head, payload, EOP)
+    def createPACKAGE(self, head, payload):
+        self.package = numpy.concatenate(head, payload, self.EOP)
 
     def addByteStuff(self,payload):
         pass
@@ -90,8 +97,8 @@ class TX(object):
         """
 
         self.payload = data
-        head = self.createHEAD(4, len(data))
-        self.createPACKAGE(head, self.payload, self.EOP())
+        head = self.createHEAD(4, len(data), len(self.EOP))
+        self.createPACKAGE(head, self.payload)
 
         self.transLen   = 0
         self.buffer = self.package

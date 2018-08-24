@@ -9,7 +9,6 @@
 
 # Importa pacote de tempo
 import time
-import numpy
 
 # Threads
 import threading
@@ -29,7 +28,7 @@ class TX(object):
         self.empty       = True
         self.threadMutex = False
         self.threadStop  = False
-        self.package = None
+
 
     def thread(self):
         """ TX thread, to send data in parallel with the code
@@ -63,23 +62,6 @@ class TX(object):
         """
         self.threadMutex = True
 
-    def createHEAD(self, headsize, payloadsize):
-        head_bytes = (payloadsize).to_bytes(headsize, bitesorder="BIG")
-        return head_bytes
-
-
-    def EOP(self):
-        str = "EOP"
-        EOPbytes = str.encode(str)
-        return EOPbytes
-
-    def createPACKAGE(self, head, payload, EOP):
-        self.package = numpy.concatenate(head, payload, EOP)
-
-    def addByteStuff(self,payload):
-        list = payload.split("")
-
-
     def sendBuffer(self, data):
         """ Write a new data to the transmission buffer.
             This function is non blocked.
@@ -88,13 +70,8 @@ class TX(object):
         of transmission, this erase all content of the buffer
         in order to save the new value.
         """
-
-        self.payload = data
-        head = self.createHEAD(12, len(data))
-        self.createPACKAGE(head, self.payload, EOP)
-
         self.transLen   = 0
-        self.buffer = self.package
+        self.buffer = data
         self.threadMutex  = True
 
     def getBufferLen(self):
@@ -107,9 +84,10 @@ class TX(object):
         """
         #print("O tamanho transmitido. Impressao fora do thread {}" .format(self.transLen))
         return(self.transLen)
-
+        
 
     def getIsBussy(self):
         """ Return true if a transmission is ongoing
         """
         return(self.threadMutex)
+
