@@ -20,7 +20,7 @@ import time
 #   python -m serial.tools.list_ports
 # se estiver usando windows, o gerenciador de dispositivos informa a porta
 
-serialName = "/dev/ttyACM0"           # Ubuntu (variacao de)
+serialName = "/dev/ttyACM1"           # Ubuntu (variacao de)
 #serialName = "/dev/tty.usbmodem1411" # Mac    (variacao de)
 #serialName = "COM5"                  # Windows(variacao de)
 
@@ -62,7 +62,8 @@ def main():
                     buffer_completo+=parte_buffer
                     if len(buffer_completo)>0:
                         tempoRecebimento = time.time() - start
-                        print(b''.join(buffer_completo),len(buffer_completo),"Tempo de recebimento da informação em segundos:{}".format(tempoRecebimento))
+                        print(b''.join(buffer_completo),len(buffer_completo),"Tempo de recebimento: {} segundos".format(tempoRecebimento/8))
+                    
                         img = b''.join(buffer_completo)
                         buffer_completo=[]
                         parte_buffer=[]

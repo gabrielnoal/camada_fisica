@@ -9,7 +9,8 @@
 
 # Importa pacote de tempo
 import time
-import numpy
+import numpy as np
+import binascii
 
 # Threads
 import threading
@@ -30,7 +31,8 @@ class TX(object):
         self.threadMutex = False
         self.threadStop  = False
         self.package     = None
-        self.EOP         = self.EOP()
+        self.EOP         = self.createEOP()
+        self.headSize    = 16
 
     def thread(self):
         """ TX thread, to send data in parallel with the code
@@ -65,23 +67,28 @@ class TX(object):
         self.threadMutex = True
 
     def calcOverHead(self):
+        overHead = (self.headSize + len(self.payload) + len(self.EOP)/len(self.payload))
+        print("Overhead: {}%".format(round(overHead,2)/10))
+        return overHead
         
         
-    def createHEAD(self, headsize, payloadsize, EOPsize):
+    def createHEAD(self, payloadSize, EOPSize):
         head_bytes = None
-        overhead = (headsize + payloadsize + EOPsize)/payloadsize
-        head_bytes = (overHead).to_bytes(headsize, bitesorder="BIG")
-        head_bytes = (payloadsize).to_bytes(headsize, bitesorder="BIG")
+        overHead = (self.headSize + payloadSize + EOPSize)/payloadSize
+        overHead = self.calcOverHead()
+        head_bytes = round(overHead).to_bytes(self.headSize, byteorder="big")
+        head_bytes = payloadSize.to_bytes(self.headSize, byteorder="big")
+        
         return head_bytes
 
 
     def createEOP(self):
-        str = "NOAL"
-        EOPbytes = str.encode(str)
+        EOPbytes = bytes("WARLEN","utf-8")
+        print(EOPbytes)
         return EOPbytes
 
     def createPACKAGE(self, head, payload):
-        self.package = numpy.concatenate(head, payload, self.EOP)
+        self.package = head + payload + self.EOP
 
     def addByteStuff(self,payload):
         pass
@@ -95,22 +102,25 @@ class TX(object):
         of transmission, this erase all content of the buffer
         in order to save the new value.
         """
-
+        #print(data)
         self.payload = data
-        head = self.createHEAD(4, len(data), len(self.EOP))
-        self.createPACKAGE(head, self.payload)
-
+        HEAD = self.createHEAD(len(self.payload), len(self.EOP))
+        self.createPACKAGE(HEAD, self.payload)
+        
         self.transLen   = 0
         self.buffer = self.package
+        #print(self.buffer)
+        #tempoteorico = (self.getBufferLen*2)/
+        
         self.threadMutex  = True
 
     def getBufferLen(self):
-        """ Return the total size of bytes in the TX buffer
+        """ Return the total Size of bytes in the TX buffer
         """
         return(len(self.buffer))
 
     def getStatus(self):
-        """ Return the last transmission size
+        """ Return the last transmission Size
         """
         #print("O tamanho transmitido. Impressao fora do thread {}" .format(self.transLen))
         return(self.transLen)

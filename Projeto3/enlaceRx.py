@@ -91,6 +91,7 @@ class RX(object):
         b           = self.buffer[0:nData]
         self.buffer = self.buffer[nData:]
         self.threadResume()
+        
         return(b)
 
     def getNData(self, size):
@@ -105,9 +106,21 @@ class RX(object):
             #print("ERROS!!! TERIA DE LER %s E LEU APENAS %s", (size,temPraLer))
         while(self.getBufferLen() < size):
             time.sleep(0.05)
-#                 
+        self.findEOP(self.getBuffer(size))
         return(self.getBuffer(size))
 
+    def findEOP(self, dados):
+        eop = bytes("WARLEN","utf-8")
+        achou = False
+        for byte in dados:
+            if byte == eop:
+                achou = True
+                print("EOP encontrado no index {}".format(dados.index(byte)))
+        
+        if not achou:
+            print("[ERRO] - EOP NOT ENCONTRADO")
+        print("Tamanho dos dados: {}".format(len(dados)))
+        pass
 
     def clearBuffer(self):
         """ Clear the reception buffer
