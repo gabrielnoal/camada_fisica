@@ -28,6 +28,7 @@ class fisica(object):
         self.stop        = serial.STOPBITS_ONE
         self.timeout     = 0.1
         self.rxRemain    = b""
+        self.EOP         = b'\x11\x22\x33\x44'
 
     def open(self):
         """ Opens serial port and configure it

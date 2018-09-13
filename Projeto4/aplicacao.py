@@ -94,6 +94,8 @@ class Application:
         pass
 
     def sendFile(self):
+        #print(self.filePath)
+        file_emoji = "/home/gabrielnoal/Documentos/INSPER/4o semestre/Camada Fisica/camada_fisica/Projeto4/emoji.jpg"
         aplicacao_send.main(self.filePath)
         pass
     

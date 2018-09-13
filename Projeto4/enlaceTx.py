@@ -32,8 +32,9 @@ class TX(object):
         self.threadMutex = False
         self.threadStop  = False
         self.package     = None
-        self.EOP         = self.createEOP()
+        self.EOP         =  fisica.EOP
         self.headSize    = 16
+        self.payload     = b'\x00'
 
     def thread(self):
         """ TX thread, to send data in parallel with the code
@@ -67,51 +68,32 @@ class TX(object):
         """
         self.threadMutex = True
 
-    def calcOverHead(self):
-        overHead = (self.headSize + len(self.payload) + len(self.EOP)/len(self.payload))
-        print("Overhead: {}%".format(round(overHead,2)/10))
+    def calcOverHead(self, payload):
+        overHead = (self.headSize + len(payload) + len(self.EOP)/len(payload))
+        print("Overhead: {}%".format(overHead/10))
         return overHead
         
         
-    def createHEAD(self, payloadSize, EOPSize):
-        overHead = self.calcOverHead()
-        msg_type = (1).to_bytes(1, byteorder="big")
+    def createHEAD(self, msg_type, payload):
+        overHead = self.calcOverHead(payload) # Calcula o overhead
+        msg_type = (msg_type).to_bytes(1, byteorder="big")
         overHead_bytes = round(overHead).to_bytes(2, byteorder="big")
+        payloadSize = len(payload)
         payloadSize_bytes = payloadSize.to_bytes(4, byteorder="big")
+        #print("payloadSize_bytes: {}".format(payloadSize_bytes))
+        #print("payloadSize: {}".format(payloadSize))
+        #print("payload: {}".format(payload))
         head_bytes = (0).to_bytes(self.headSize - len(msg_type) -len(payloadSize_bytes)-len(overHead_bytes), byteorder="big")
         head_bytes += msg_type + overHead_bytes + payloadSize_bytes
-        #print(head_bytes)
+        #print("seu head: ",head_bytes)
         return head_bytes
 
 
-    def createEOP(self):
-        EOPbytes = 129
-        EOPbytes = EOPbytes.to_bytes(4, byteorder="big")
-        print(EOPbytes)
-        return EOPbytes
 
-    def createPACKAGE(self, head, payload):
+    def createPACKAGE(self, msg_type = 0, payload = (b'\x00')):
+        head = self.createHEAD(msg_type,payload)
         self.package = head + payload + self.EOP
-
-    def addByteStuff(self,payload):
-
-        eop_position = payload.find(self.EOP)
-        #print(self.EOP)
-        #print(eop_position)
-        #print((self.headSize + len(payload)) - len(self.EOP))
-        if eop_position == -1:
-            print("ERROR: EOP NOT FOUND")
-
-        print("eop possition: {}".format(eop_position))
-        possition_final = (self.headSize + len(payload))
-        print(possition_final)
-        #while eop_position < (self.headSize + len(payload)):  # Verifica se o eop encontrado está no final do package
-            #print(eop_position)
-            #stuff_position = eop_position - 1
-            #eop_position = payload.find(self.EOP, eop_position+1)
-            #print(eop_position)
-
-
+        return self.package
 
 
     def sendBuffer(self, data):
@@ -123,17 +105,11 @@ class TX(object):
         in order to save the new value.
         """
         #print(data)
-        self.payload = data
-        HEAD = self.createHEAD(len(self.payload), len(self.EOP))
-        self.addByteStuff(data)
-        self.createPACKAGE(HEAD, self.payload)
-        
         self.transLen   = 0
-        self.buffer = self.package
+        self.buffer = data
         #print(self.buffer)
-        
-        
         self.threadMutex  = True
+
 
     def getBufferLen(self):
         """ Return the total Size of bytes in the TX buffer
