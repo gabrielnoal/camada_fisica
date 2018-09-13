@@ -55,17 +55,17 @@ def main():
 
     # Faz a recepção dos dados
     print ("Recebendo dados... ")
-    payloadSize = 0
-    while payloadSize < 1:
+    while com.mensagemTipo7['recebida'] == False:
         time.sleep(0.1)    
         data, size , payloadSize = com.getData()
 
     print("-------------------------------")
 
-    print ("Lido              {} bytes ".format(size))
+    print ("Lido              {} bytes ".format(com.dataSize))
     newFile = open("novoarquivo.jpg", "wb")
-    newFile.write(data)
+    newFile.write(com.data)
     newFile.close()
+    
 
 
     #so roda o main quando for executado do terminal ... se for chamado dentro de outro modulo nao roda

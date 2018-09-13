@@ -33,11 +33,10 @@ class enlace(object):
         self.connected   = False
         self.payload     = b'\x00'
         self.package     = None
-        self.EOP         =  b'\x01\x02\x03\x04'
+        self.dataSize    = 0    
         self.headSize    = 16
         self.clientSynchComplete = False
         self.serverSynchComplete = False
-        self.emptyPackage = self.tx.createPACKAGE()
 
         self.mensagemTipo1 = {'enviada': False , 'recebida': False}
         self.mensagemTipo2 = {'enviada': False , 'recebida': False}
@@ -89,9 +88,11 @@ class enlace(object):
             messageType = self.checkMessageType(data) #Verifica o tipo da mensagem no buffer
         payloadSize = 1
         if messageType == 4:
+            #print(data)
             recievePack = data
-            data, payloadSize = self.rx.unpackage(recievePack)
-            self.checkAcknoledgement(data, payloadSize)
+            self.data, self.dataSize = self.rx.unpackage(recievePack)
+            self.checkAcknoledgement(self.data, self.dataSize)
+            return self.data, len(self.data), self.dataSize
 
         
 
@@ -128,7 +129,6 @@ class enlace(object):
             while self.mensagemTipo2['recebida'] == False: # Acada segundos verifica se recebeu a mensagem tipo 2
                 data , size, payloadSize = self.getData(1) # Le o Buffer de recebimento
                 timeout = self.rx.timeout
-                print("Tempo de resposta: {}s".format(timeout))
                 if timeout >= 5:
                     print("[ERRO] - Não recebimento da mensagem tipo 2")
                     return
@@ -154,7 +154,6 @@ class enlace(object):
         while self.mensagemTipo3['recebida'] == False:
             data, size, payloadSize = self.getData(2)
             timeout = self.rx.timeout
-            print("Tempo de resposta: {}s".format(timeout))
             if timeout >= 5:
                 print("[ERRO] - Não recebimento da mensagem tipo 3")
                 return
@@ -170,16 +169,15 @@ class enlace(object):
         self.mensagemTipo4['enviada'] = True
 
         time.sleep(0.2)
-        while self.mensagemTipo5['recebida'] == False or self.mensagemTipo6['recebida'] == False:
+        while self.mensagemTipo5['recebida'] == False:
             data , size, payloadSize = self.getData(4)
             timeout = self.rx.timeout
-            print("Tempo de resposta: {}s".format(timeout))
             if timeout >= 5:
                 print("[ERRO] - Não recebimento da mensagem tipo 5 ou 6")
                 return
             if self.mensagemTipo6["recebida"] == True:
                 self.sendData(pack)
-            print("Mensagem tipo 4 enviada novamente")
+                print("Mensagem tipo 4 enviada novamente")
 
 
     def checkAcknoledgement(self, data, payloadSize):
@@ -229,6 +227,7 @@ class enlace(object):
         elif messageType == 5:
             print("Mensagem tipo 5: Recebida")
             self.mensagemTipo5['recebida'] = True
+            self.sendEndingMassage()
             return 5
             
         elif messageType == 6:
@@ -238,19 +237,24 @@ class enlace(object):
 
         elif messageType == 7:
             # Encerra comunicação
+            print("Mensagem tipo 7: Recebida")
             print("-------------------------")
             print("Comunicação encerrada")
             print("-------------------------")
-            self.mensagemTipo7['recebida']
+            self.mensagemTipo7['recebida'] = True
             self.disable()    
         else:
             print("ERROR: Mensagem tipo {}".format(messageType))
             print("ERROR: Ultima Mensagem {}".format(last_message))
+
     def sendEndingMassage(self):
         pack7 = self.tx.createPACKAGE(7)
         self.sendData(pack7)
-        print("Mensagem tipo 7: Enviada")
         self.mensagemTipo7['enviada'] = True
+        print("Mensagem tipo 7: Enviada")
+        print("-------------------------")
+        print("Comunicação encerrada")
+        print("-------------------------")
         self.disable()
 
     

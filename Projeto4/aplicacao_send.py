@@ -54,9 +54,8 @@ def main(fileName):
     print("tentado transmitir .... {} bytes".format(imgLen))
     com.clientSendFile(img)
 
-    com.sendEndingMassage()
 
     #so roda o main quando for executado do terminal ... se for chamado dentro de outro modulo nao roda
 if __name__ == "__main__":
-    imgName = "emoji.jpg"
+    imgName = "warlen.jpg"
     main(imgName)
