@@ -179,7 +179,7 @@ class RX(object):
             print("-----------------")
             print("----OVER HEAD----")
             print(overHead_bytes)
-            print("{}%".format(overHead_int/10))
+            print("{}%".format(overHead_int))
 
             payloadSize_bytes = header[12:]
             payloadSize_int = int.from_bytes(payloadSize_bytes, byteorder='big')

@@ -70,7 +70,7 @@ class TX(object):
 
     def calcOverHead(self, payload):
         overHead = (self.headSize + len(payload) + len(self.EOP)/len(payload))
-        print("Overhead: {}%".format(overHead/10))
+        print("Overhead: {}%".format(overHead))
         return overHead
         
         

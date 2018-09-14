@@ -244,8 +244,9 @@ class enlace(object):
             self.mensagemTipo7['recebida'] = True
             self.disable()    
         else:
-            print("ERROR: Mensagem tipo {}".format(messageType))
-            print("ERROR: Ultima Mensagem {}".format(last_message))
+            pass
+            #print("ERROR: Mensagem tipo {}".format(messageType))
+            #print("ERROR: Ultima Mensagem {}".format(last_message))
 
     def sendEndingMassage(self):
         pack7 = self.tx.createPACKAGE(7)
