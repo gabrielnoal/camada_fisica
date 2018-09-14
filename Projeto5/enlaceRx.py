@@ -165,6 +165,36 @@ class RX(object):
             print("-----------------")
             print("------HEADER-----")
             print(header)
+            
+            packageNumber_bytes = header[5:6]
+            packageNumber_int = header[5]
+            print("-----------------")
+            print("NUMERO DO PACOTE")
+            print(packageNumber_bytes)
+            print(packageNumber_int)
+
+            packageTotal_bytes = header[6:7]
+            packageTotal_int = header[6]
+            print("-----------------")
+            print("NUMERO TOTAL DE PACOTES")
+            print(packageTotal_bytes)
+            print(packageTotal_int)
+
+            erro8_bytes = header[7:8]
+            erro8_int = header[7]
+            print("-----------------")
+            print("---ERRO TIPO 8---")
+            print(erro8_bytes)
+            print(erro8_int)
+    
+
+            packageExpected_bytes = header[8:9]
+            packageExpected_int   = header[8]
+            print("-----------------")
+            print("PACOTE ESPERADO")
+            print(packageExpected_bytes)
+            print(packageExpected_int)
+    
 
             msg_type_bytes = header[9:10]
             msg_type_int = header[9]
@@ -179,7 +209,7 @@ class RX(object):
             print("-----------------")
             print("----OVER HEAD----")
             print(overHead_bytes)
-            print("{}%".format(overHead_int/10))
+            print("{}%".format(overHead_int))
 
             payloadSize_bytes = header[12:]
             payloadSize_int = int.from_bytes(payloadSize_bytes, byteorder='big')
@@ -190,7 +220,7 @@ class RX(object):
 
             print("-----------------")
 
-            return payload, payloadSize_int
+            return packageNumber_int, packageTotal_int, erro8_int, packageExpected_int, payloadSize_int , payload
             
 
 

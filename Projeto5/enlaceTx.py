@@ -70,28 +70,30 @@ class TX(object):
 
     def calcOverHead(self, payload):
         overHead = (self.headSize + len(payload) + len(self.EOP)/len(payload))
-        print("Overhead: {}%".format(overHead/10))
+        print("Overhead: {}%".format(overHead))
         return overHead
         
         
-    def createHEAD(self, msg_type, payload):
+    def createHEAD(self, msg_type, payload, packageNum, packageTotal , error8, packageExpected):
+        packageNum = (packageNum).to_bytes(1, byteorder="big") #Numero do pacote em bytes
+        packageTotal = (packageTotal).to_bytes(1, byteorder="big") #Numero total do pacote em bytes
+        error8 = (error8).to_bytes(1, byteorder="big") #Erro tipo 8. False se 0, True se 1.
+        packageExpected = (packageExpected).to_bytes(1, byteorder="big") #Numero do pacote que era pra chegar em bytes
+        msg_type = (msg_type).to_bytes(1, byteorder="big") #Tipo de mensagem em 1 bytes         
         overHead = self.calcOverHead(payload) # Calcula o overhead
-        msg_type = (msg_type).to_bytes(1, byteorder="big")
-        overHead_bytes = round(overHead).to_bytes(2, byteorder="big")
-        payloadSize = len(payload)
-        payloadSize_bytes = payloadSize.to_bytes(4, byteorder="big")
-        #print("payloadSize_bytes: {}".format(payloadSize_bytes))
-        #print("payloadSize: {}".format(payloadSize))
-        #print("payload: {}".format(payload))
-        head_bytes = (0).to_bytes(self.headSize - len(msg_type) -len(payloadSize_bytes)-len(overHead_bytes), byteorder="big")
-        head_bytes += msg_type + overHead_bytes + payloadSize_bytes
+        overHead_bytes = round(overHead).to_bytes(2, byteorder="big") #Transforma o overhead em 2 bytes
+        payloadSize = len(payload) # Tamanho do dado a ser transmitido
+        payloadSize_bytes = payloadSize.to_bytes(4, byteorder="big") #Transforma o payloadSize em 4 bytes
+        headSize = (self.headSize - (len(packageNum) + len(packageTotal) + len(error8) + len(packageExpected) + len(msg_type) + len(payloadSize_bytes) + len(overHead_bytes))) #É o tamanho complementar do head
+        head_bytes = (0).to_bytes(headSize, byteorder="big")
+        head_bytes += packageNum + packageTotal + error8 + packageExpected + msg_type + overHead_bytes + payloadSize_bytes
         #print("seu head: ",head_bytes)
         return head_bytes
 
 
 
-    def createPACKAGE(self, msg_type = 0, payload = (b'\x00')):
-        head = self.createHEAD(msg_type,payload)
+    def createPACKAGE(self, msg_type = 0, payload = (b'\x00'), packageNum=1, packageTotal=1 ,error8=0, packageExpected=0):
+        head = self.createHEAD(msg_type,payload, packageNum, packageTotal , error8, packageExpected)
         self.package = head + payload + self.EOP
         return self.package
 

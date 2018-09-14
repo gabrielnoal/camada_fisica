@@ -90,7 +90,7 @@ class enlace(object):
         if messageType == 4:
             #print(data)
             recievePack = data
-            self.data, self.dataSize = self.rx.unpackage(recievePack)
+            self.packageNumber, self.packageTotal, self.erro8, self.packageExpected, self.dataSize, self.data = self.rx.unpackage(recievePack)
             self.checkAcknoledgement(self.data, self.dataSize)
             return self.data, len(self.data), self.dataSize
 
@@ -115,10 +115,10 @@ class enlace(object):
         pass
 
     def clientSynch(self):
+        # Cria pacote vazio com mensagem tipo 1
+        pack1 = self.tx.createPACKAGE(1)
         while self.mensagemTipo2['recebida'] == False:
-            # Cria pacote vazio com mensagem tipo 1
-            pack1 = self.tx.createPACKAGE(1)
-        
+            
             # Envia mensagem tipo 1
             self.sendData(pack1)
             print("Mensagem tipo 1: Enviada")
@@ -126,12 +126,11 @@ class enlace(object):
 
     
 
-            while self.mensagemTipo2['recebida'] == False: # Acada segundos verifica se recebeu a mensagem tipo 2
-                data , size, payloadSize = self.getData(1) # Le o Buffer de recebimento
-                timeout = self.rx.timeout
-                if timeout >= 5:
-                    print("[ERRO] - Não recebimento da mensagem tipo 2")
-                    return
+            self.getData(1) # Le o Buffer de recebimento
+            timeout = self.rx.timeout
+            if timeout >= 5:
+                print("[ERRO] - Não recebimento da mensagem tipo 2")
+                return
         #Cria pacote vazio com mensagem tipo 3    
         pack3 = self.tx.createPACKAGE(3)
         # Envia mensagem tipo 3
@@ -143,7 +142,7 @@ class enlace(object):
     def serverSynch(self):
         while self.mensagemTipo1['recebida'] == False:
             time.sleep(0.1)
-            data, size, payloadSize = self.getData()
+            self.getData()
         
         # Cria pacote vazio com mensagem tipo 2
         pack2 = self.tx.createPACKAGE(2)
@@ -152,7 +151,7 @@ class enlace(object):
 
         time.sleep(0.1)
         while self.mensagemTipo3['recebida'] == False:
-            data, size, payloadSize = self.getData(2)
+            self.getData(2)
             timeout = self.rx.timeout
             if timeout >= 5:
                 print("[ERRO] - Não recebimento da mensagem tipo 3")
@@ -201,6 +200,8 @@ class enlace(object):
             messageType = message[9]
         except:
             print("DEU RUIM AQUI")
+        print(messageType)
+        
         if messageType == 0 and last_message != 0:
             if last_message == 4:
                 print("[ERRO] - Não recebimento da mensagem tipo 5 ou 6")
@@ -244,8 +245,9 @@ class enlace(object):
             self.mensagemTipo7['recebida'] = True
             self.disable()    
         else:
-            print("ERROR: Mensagem tipo {}".format(messageType))
-            print("ERROR: Ultima Mensagem {}".format(last_message))
+            pass
+            #print("ERROR: Mensagem tipo {}".format(messageType))
+            #print("ERROR: Ultima Mensagem {}".format(last_message))
 
     def sendEndingMassage(self):
         pack7 = self.tx.createPACKAGE(7)

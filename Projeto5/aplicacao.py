@@ -7,8 +7,8 @@
 #  Aplicação
 ####################################################
 
-import server
-import client
+import aplicacao_receive
+import aplicacao_send
 import time
 from tkinter import filedialog
 from tkinter import*

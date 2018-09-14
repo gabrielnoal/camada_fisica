@@ -36,7 +36,7 @@ def main():
 
     # Ativa comunicacao
     com.enable()
-    
+    com.rx.clearBuffer()
     #verificar que a comunicação foi aberta
     print("comunicação aberta")
 

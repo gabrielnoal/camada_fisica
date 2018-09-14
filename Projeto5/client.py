@@ -36,6 +36,7 @@ def main(fileName):
 
     # Ativa comunicacao
     com.enable()
+    com.rx.clearBuffer()
 
     #verificar que a comunicação foi aberta
     print("comunicação aberta")
@@ -57,5 +58,5 @@ def main(fileName):
 
     #so roda o main quando for executado do terminal ... se for chamado dentro de outro modulo nao roda
 if __name__ == "__main__":
-    imgName = "warlen.jpg"
+    imgName = "emoji.jpg"
     main(imgName)
