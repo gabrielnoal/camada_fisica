@@ -159,7 +159,7 @@ class enlace(object):
             atualPack = i+1
             subPack = packages[i]
             pack = self.tx.createPACKAGE(4,subPack,atualPack,nPackages)
-            self.rx.printer(pack)
+            #self.rx.printer(pack)
             self.sendData(pack)
             print("Pacote {}/{} enviados".format(i+1,nPackages))
             while self.mensagemTipo5['recebida'] == False:
@@ -180,6 +180,7 @@ class enlace(object):
     def checkAcknoledgement(self, data, payloadSize, packageNumber, packageTotal, packageExpected):
         print("Len data: {}  PayloadSize: {}".format(len(data), payloadSize))
         if len(data) == payloadSize:
+            print("{} {}".format(packageNumber == self.packageExpected, packageNumber <= packageTotal))
             if packageNumber == self.packageExpected and packageNumber <= packageTotal:
                 self.packageExpected += 1
                 mensagemTipo5 = self.tx.createPACKAGE(5)
@@ -205,7 +206,7 @@ class enlace(object):
             messageType = message[9]
         except:
             print("DEU RUIM AQUI")
-        print(messageType)
+        #print(messageType)
         
         if messageType == 0 and last_message != 0:
             if last_message == 4:

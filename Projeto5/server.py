@@ -55,12 +55,14 @@ def main():
     # Faz a recepção dos dados
     print ("Recebendo dados... ")
     while com.mensagemTipo7['recebida'] == False:
-        time.sleep(0.1)    
+        time.sleep(0.2)    
         com.getData()
 
     print("-------------------------------")
+    print("----Terminou a transmissão----")
+    print("-------------------------------")
     file = b''.join(com.file)
-    print ("Lido              {} bytes ".format(com.dataSize))
+    print ("Lido              {} bytes ".format(len(file)))
     newFile = open("novoarquivo.jpg", "wb")
     newFile.write(file)
     newFile.close()

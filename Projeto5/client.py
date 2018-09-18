@@ -54,6 +54,7 @@ def main(fileName):
 
     # Transmite dado
     print("tentado transmitir .... {} bytes".format(imgLen))
+    time.sleep(0.3)
     com.clientSendPackages(sub_pack)
     print("----Terminou a transmissão----")
     print("-------------------------------")
