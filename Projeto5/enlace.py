@@ -37,6 +37,8 @@ class enlace(object):
         self.headSize    = 16
         self.clientSynchComplete = False
         self.serverSynchComplete = False
+        self.file        = []
+        self.packageExpected = 1
 
         self.mensagemTipo1 = {'enviada': False , 'recebida': False}
         self.mensagemTipo2 = {'enviada': False , 'recebida': False}
@@ -45,7 +47,8 @@ class enlace(object):
         self.mensagemTipo5 = {'enviada': False , 'recebida': False}
         self.mensagemTipo6 = {'enviada': False , 'recebida': False}
         self.mensagemTipo7 = {'enviada': False , 'recebida': False}
-
+        self.mensagemTipo8 = {'enviada': False , 'recebida': False}
+        
 
 
     def enable(self):
@@ -90,29 +93,16 @@ class enlace(object):
         if messageType == 4:
             #print(data)
             recievePack = data
-            self.packageNumber, self.packageTotal, self.erro8, self.packageExpected, self.dataSize, self.data = self.rx.unpackage(recievePack)
-            self.checkAcknoledgement(self.data, self.dataSize)
-            return self.data, len(self.data), self.dataSize
+            packageNumber, packageTotal, erro8, packageExpected, dataSize, data = self.rx.unpackage(recievePack)
+            self.checkAcknoledgement(data, dataSize,packageNumber, packageTotal,packageExpected)
+            self.file.append(data)
+            return data, len(data), dataSize
 
         
 
         return data, len(data), payloadSize
     
-    def findEOP(self, dados):
-        EOPbytes = 129
-        EOPbytes = EOPbytes.to_bytes(4, byteorder="big")
-        print("EOP: {}".format(EOPbytes))
-        achou = False
-        for byte in dados:
-            #print(byte)
-            if byte == EOPbytes:
-                achou = True
-                print("EOPbytes encontrado no index {}".format(dados.index(byte)))
-        
-        if not achou:
-            print("[ERRO] - EOPbytes NOT ENCONTRADO")
-        print("Tamanho dos dados: {}".format(len(dados)))
-        pass
+
 
     def clientSynch(self):
         # Cria pacote vazio com mensagem tipo 1
@@ -158,39 +148,54 @@ class enlace(object):
                 return
         self.serverSynchComplete = True
 
+    def splitPack(self, payload, payloadLimit=128):
+        subPacks = [payload[i:i+payloadLimit] for i in range(0,len(payload),payloadLimit)]
+        return subPacks
 
-    def clientSendFile(self, file):
-        time.sleep(0.2)
-        pack = self.tx.createPACKAGE(4, file)
-        #print(pack)
-        self.rx.unpackage(pack)
-        self.sendData(pack)
-        self.mensagemTipo4['enviada'] = True
+    def clientSendPackages(self, packages):
+        self.packageExpected = 1
+        nPackages = len(packages)
+        for i in range(nPackages):
+            atualPack = i+1
+            subPack = packages[i]
+            pack = self.tx.createPACKAGE(4,subPack,atualPack,nPackages)
+            self.rx.printer(pack)
+            self.sendData(pack)
+            print("Pacote {}/{} enviados".format(i+1,nPackages))
+            while self.mensagemTipo5['recebida'] == False:
+                time.sleep(0.2)                
+                self.getData(4)
+                timeout = self.rx.timeout
+                if timeout >= 5:
+                    print("[ERRO] - Não recebimento da mensagem tipo 5 ou 6")
+                    return
+                if self.mensagemTipo6["recebida"] == True:
+                    self.sendData(pack)
+                    print("Pacote enviado novamente")
 
-        time.sleep(0.2)
-        while self.mensagemTipo5['recebida'] == False:
-            data , size, payloadSize = self.getData(4)
-            timeout = self.rx.timeout
-            if timeout >= 5:
-                print("[ERRO] - Não recebimento da mensagem tipo 5 ou 6")
-                return
-            if self.mensagemTipo6["recebida"] == True:
-                self.sendData(pack)
-                print("Mensagem tipo 4 enviada novamente")
+            self.mensagemTipo5['recebida'] = False
+            self.mensagemTipo6['recebida'] = False
+        self.sendEndingMassage()
 
-
-    def checkAcknoledgement(self, data, payloadSize):
+    def checkAcknoledgement(self, data, payloadSize, packageNumber, packageTotal, packageExpected):
         print("Len data: {}  PayloadSize: {}".format(len(data), payloadSize))
         if len(data) == payloadSize:
-            mensagemTipo5 = self.tx.createPACKAGE(5)
-            self.sendData(mensagemTipo5)
-            self.mensagemTipo5['enviada'] = True
-            print("Mensagem tipo 5 enviada")
+            if packageNumber == self.packageExpected and packageNumber <= packageTotal:
+                self.packageExpected += 1
+                mensagemTipo5 = self.tx.createPACKAGE(5)
+                self.sendData(mensagemTipo5)
+                self.mensagemTipo5['enviada'] = True
+                print("Mensagem tipo 5 enviada")
+            else:
+                mensagemTipo8 = self.tx.createPACKAGE(8,error8=1,packageExpected=packageExpected)
+                self.sendData(mensagemTipo8)
+                self.mensagemTipo8['enviada'] = True
+                print("Mensagem tipo 8 enviada")
             
         else:
             mensagemTipo6 = self.tx.createPACKAGE(6)
             self.sendData(mensagemTipo6)
-            self.mensagemTipo5['enviada'] = True
+            self.mensagemTipo6['enviada'] = True
             print("Mensagem tipo 6 enviada")
 
 
@@ -228,7 +233,7 @@ class enlace(object):
         elif messageType == 5:
             print("Mensagem tipo 5: Recebida")
             self.mensagemTipo5['recebida'] = True
-            self.sendEndingMassage()
+            #self.sendEndingMassage()
             return 5
             
         elif messageType == 6:
@@ -243,7 +248,10 @@ class enlace(object):
             print("Comunicação encerrada")
             print("-------------------------")
             self.mensagemTipo7['recebida'] = True
-            self.disable()    
+            self.disable()  
+        elif messageType == 8:
+            print("Mensagem tipo 8: Recebida")
+            self.mensagemTipo8['recebida'] = True
         else:
             pass
             #print("ERROR: Mensagem tipo {}".format(messageType))

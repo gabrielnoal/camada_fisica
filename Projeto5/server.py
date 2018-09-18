@@ -20,7 +20,7 @@ import time
 #   python -m serial.tools.list_ports
 # se estiver usando windows, o gerenciador de dispositivos informa a porta
 
-serialName = "/dev/ttyACM2"           # Ubuntu (variacao de)
+serialName = "/dev/ttyACM0"           # Ubuntu (variacao de)
 #serialName = "/dev/tty.usbmodem1411" # Mac    (variacao de)
 #serialName = "COM5"                  # Windows(variacao de)
 
@@ -48,8 +48,7 @@ def main():
     # Faz a recepção dos dados
     print("-------------------------------")
     print("-----Começou o server Synch----")
-    while com.serverSynchComplete == False:
-        com.serverSynch()
+    com.serverSynch()
     print("----Terminou o server Synch----")
     print("-------------------------------")
 
@@ -57,13 +56,13 @@ def main():
     print ("Recebendo dados... ")
     while com.mensagemTipo7['recebida'] == False:
         time.sleep(0.1)    
-        data, size , payloadSize = com.getData()
+        com.getData()
 
     print("-------------------------------")
-
+    file = b''.join(com.file)
     print ("Lido              {} bytes ".format(com.dataSize))
     newFile = open("novoarquivo.jpg", "wb")
-    newFile.write(com.data)
+    newFile.write(file)
     newFile.close()
     
 

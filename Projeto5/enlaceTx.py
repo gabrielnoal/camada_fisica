@@ -69,8 +69,8 @@ class TX(object):
         self.threadMutex = True
 
     def calcOverHead(self, payload):
-        overHead = (self.headSize + len(payload) + len(self.EOP)/len(payload))
-        print("Overhead: {}%".format(overHead))
+        overHead = (self.headSize + len(payload) + len(self.EOP))/len(payload)
+        #print("Overhead: {}%".format(overHead))
         return overHead
         
         
@@ -84,7 +84,9 @@ class TX(object):
         overHead_bytes = round(overHead).to_bytes(2, byteorder="big") #Transforma o overhead em 2 bytes
         payloadSize = len(payload) # Tamanho do dado a ser transmitido
         payloadSize_bytes = payloadSize.to_bytes(4, byteorder="big") #Transforma o payloadSize em 4 bytes
+        
         headSize = (self.headSize - (len(packageNum) + len(packageTotal) + len(error8) + len(packageExpected) + len(msg_type) + len(payloadSize_bytes) + len(overHead_bytes))) #É o tamanho complementar do head
+        
         head_bytes = (0).to_bytes(headSize, byteorder="big")
         head_bytes += packageNum + packageTotal + error8 + packageExpected + msg_type + overHead_bytes + payloadSize_bytes
         #print("seu head: ",head_bytes)

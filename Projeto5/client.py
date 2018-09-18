@@ -20,7 +20,7 @@ import time
 #   python -m serial.tools.list_ports
 # se estiver usando windows, o gerenciador de dispositivos informa a porta
 
-serialName = "/dev/ttyACM0"           # Ubuntu (variacao de)
+serialName = "/dev/ttyACM1"           # Ubuntu (variacao de)
 #serialName = "/dev/tty.usbmodem1411" # Mac    (variacao de)
 #serialName = "COM5"                  # Windows(variacao de)
 
@@ -50,11 +50,16 @@ def main(fileName):
     img = open(imgName, "rb").read()
     #print(img)
     imgLen    = len(img)
-    
+    sub_pack= com.splitPack(img)
+
     # Transmite dado
     print("tentado transmitir .... {} bytes".format(imgLen))
-    com.clientSendFile(img)
+    com.clientSendPackages(sub_pack)
+    print("----Terminou a transmissão----")
+    print("-------------------------------")
+    
 
+    
 
     #so roda o main quando for executado do terminal ... se for chamado dentro de outro modulo nao roda
 if __name__ == "__main__":
