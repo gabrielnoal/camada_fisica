@@ -95,16 +95,12 @@ class TX(object):
 
 
     def createPACKAGE(self, msg_type = 0, payload = (b'\x00'), packageNum=1, packageTotal=1 ,error8=0, packageExpected=0):
-        CRC16teste= self.calculaCRC16(payload)
-        CRC16 = 15
+        CRC16 = self.fisica.calculaCRC16(payload)
         head = self.createHEAD(CRC16, msg_type,payload, packageNum, packageTotal , error8, packageExpected)
         self.package = head + payload + self.EOP
         return self.package
 
-    def calculaCRC16(self,payload):
-        for bytes in payload:
-            payload_bin = bin(bytes)
-        #print(payload_bin)
+    
 
 
     def sendBuffer(self, data):
@@ -138,3 +134,4 @@ class TX(object):
         """ Return true if a transmission is ongoing
         """
         return(self.threadMutex)
+

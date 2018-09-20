@@ -169,6 +169,15 @@ class RX(object):
             print("-----------------")
             print("------HEADER-----")
             print(header)
+
+            CRC16 = header[3:5]
+            CRC16_int = int.from_bytes(CRC16,byteorder='big')
+            CRC16_bin = bin(CRC16_int)
+            print("-----------------")
+            print("------CRC-16-----")
+            print(CRC16)
+            print(CRC16_int)
+            print(CRC16_bin)
             
             packageNumber_bytes = header[5:6]
             packageNumber_int = header[5]
@@ -224,7 +233,7 @@ class RX(object):
 
             print("-----------------")
 
-            return packageNumber_int, packageTotal_int, erro8_int, packageExpected_int, payloadSize_int , payload
+            return CRC16_int, packageNumber_int, packageTotal_int, erro8_int, packageExpected_int, payloadSize_int , payload
             
 
     def printer(self,package):
@@ -299,3 +308,6 @@ class RX(object):
 
 
 
+    def checkCRC16(self,data,CRC16):
+        print(self.fisica.calculaCRC16(data))
+        return self.fisica.calculaCRC16(data)==CRC16

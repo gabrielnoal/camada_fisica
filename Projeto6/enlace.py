@@ -48,6 +48,7 @@ class enlace(object):
         self.mensagemTipo6 = {'enviada': False , 'recebida': False}
         self.mensagemTipo7 = {'enviada': False , 'recebida': False}
         self.mensagemTipo8 = {'enviada': False , 'recebida': False}
+        self.mensagemTipo9 = {'enviada': False , 'recebida': False}
         
 
 
@@ -93,8 +94,8 @@ class enlace(object):
         if messageType == 4:
             #print(data)
             recievePack = data
-            packageNumber, packageTotal, erro8, packageExpected, dataSize, data = self.rx.unpackage(recievePack)
-            self.checkAcknoledgement(data, dataSize,packageNumber, packageTotal,packageExpected)
+            CRC16, packageNumber, packageTotal, erro8, packageExpected, dataSize, data = self.rx.unpackage(recievePack)
+            self.checkAcknoledgement(CRC16,data, dataSize,packageNumber, packageTotal,packageExpected)
             return data, len(data), dataSize
 
         
@@ -175,29 +176,26 @@ class enlace(object):
                     print("Pacote enviado novamente")
 
             
-        print("ACABOU")
         self.sendEndingMassage()
 
-    def checkAcknoledgement(self, data, payloadSize, packageNumber, packageTotal, packageExpected):
+    def checkAcknoledgement(self, CRC16, data, payloadSize, packageNumber, packageTotal, packageExpected):
         print("Len data: {}  PayloadSize: {}".format(len(data), payloadSize))
         if len(data) == payloadSize:
-            print("{} {}".format(packageNumber == self.packageExpected, packageNumber == packageTotal))
+            #print("{} {}".format(packageNumber == self.packageExpected, packageNumber == packageTotal))
             if packageNumber == self.packageExpected:
-                if packageNumber < packageTotal:
-                    self.packageExpected += 1
-                    mensagemTipo5 = self.tx.createPACKAGE(5)
-                    self.sendData(mensagemTipo5)
-                    self.mensagemTipo5['enviada'] = True
-                    print("Mensagem tipo 5 enviada")
-                    self.file.append(data)
-                elif packageNumber == packageTotal:
-                    mensagemTipo5 = self.tx.createPACKAGE(5)
-                    self.sendData(mensagemTipo5)
-                    self.mensagemTipo5['enviada'] = True
-                    print("Mensagem tipo 5 enviada")
-                    self.file.append(data)
-
-                    
+                if ((packageNumber < packageTotal) or (packageNumber == packageTotal)):
+                    if self.rx.checkCRC16(data,CRC16) == True:
+                        self.packageExpected += 1
+                        mensagemTipo5 = self.tx.createPACKAGE(5)
+                        self.sendData(mensagemTipo5)
+                        self.mensagemTipo5['enviada'] = True
+                        print("Mensagem tipo 5 enviada")
+                        self.file.append(data)
+                    else:
+                        mensagemTipo9 = self.tx.createPACKAGE(9,error8=1,packageExpected=packageExpected)
+                        self.sendData(mensagemTipo9)
+                        self.mensagemTipo9['enviada'] = True
+                        print("Mensagem tipo 9 enviada")
 
             else:
                 mensagemTipo8 = self.tx.createPACKAGE(8,error8=1,packageExpected=packageExpected)
@@ -218,7 +216,7 @@ class enlace(object):
             messageType = message[9]
         except:
             print("DEU RUIM AQUI")
-        print(messageType)
+        #print(messageType)
         
         if messageType == 0 and last_message != 0:
             if last_message == 4:
@@ -264,6 +262,10 @@ class enlace(object):
         elif messageType == 8:
             print("Mensagem tipo 8: Recebida")
             self.mensagemTipo8['recebida'] = True
+        elif messageType == 9:
+            print("Mensagem tipo 9: Recebida")
+            self.mensagemTipo9['recebida'] = True
+
         else:
             pass
             #print("ERROR: Mensagem tipo {}".format(messageType))
