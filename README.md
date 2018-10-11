@@ -17,6 +17,7 @@ Turma 2018.2
 
 ### Projeto 6 - [CRC-16](https://github.com/gabrielnoal/camada_fisica/tree/master/Projeto6)
 
+## Desenvolvedores:
   * [Gabriel Noal](https://github.com/gabrielnoal)
   * [Nicolas Stegmann](https://github.com/nicolasbss)
   
