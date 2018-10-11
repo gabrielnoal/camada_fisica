@@ -16,3 +16,8 @@ Turma 2018.2
 ### Projeto 5 - [Fragmentação](https://github.com/gabrielnoal/camada_fisica/tree/master/Projeto5)
 
 ### Projeto 6 - [CRC-16](https://github.com/gabrielnoal/camada_fisica/tree/master/Projeto6)
+
+  * [Gabriel Noal](https://github.com/gabrielnoal)
+  * [Nicolas Stegmann](https://github.com/nicolasbss)
+  
+### Projeto 7 - [DTMF](https://github.com/gabrielnoal/camada_fisica/tree/master/Projeto7)
