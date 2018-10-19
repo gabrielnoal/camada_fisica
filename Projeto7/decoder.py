@@ -12,7 +12,7 @@ class Decoder:
     def __init__(self):
         self.sig = signalMeu()
         self.frequencia = 48000
-        self.matrix_frequencias =  {"1":(697,1209), "2":(697,1336), "3":(697,1209), "4":(770,1209), "5":(770,1336), "6":(770,1477), "7":(852,1209), "8":(852,1336), "9":(852,1477), "*":(941,1209), "0":(941,1336), "#":(941,1477)}
+        self.matrix_frequencias =  {"1":[697,1209], "2":[697,1336], "3":[697,1209], "4":[770,1209], "5":[770,1336], "6":[770,1477], "7":[852,1209], "8":[852,1336], "9":[852,1477], "*":[941,1209], "0":[941,1336], "#":[941,1477]}
         self.time = 0
 
     def record(self):
@@ -23,8 +23,9 @@ class Decoder:
 
     def findPeaks(self):
         recording_fft = self.sig.calcFFT(self.record(), self.frequencia)
+
         indexes = peakutils.indexes(recording_fft[1], thres=0.5, min_dist=10)
-        return indexes
+        return recording_fft[0][indexes]
 
     def plotFFT2(self):
         recording_fft = self.sig.calcFFT(self.record(), self.frequencia)
@@ -40,11 +41,19 @@ class Decoder:
         received_frequency = []
         for peak in peaks:
             for frequency in possible_frequency:
-                if abs(index - frequency) < 50:
+                if abs(peak - frequency) < 30:
                     received_frequency.append(frequency)
 
-        #for key in self.matrix_frequencias.keys():
-        #    if
+        print(received_frequency)
+
+
+        for key in self.matrix_frequencias.keys():
+            print(self.matrix_frequencias[key])
+            if received_frequency == self.matrix_frequencias[key]:
+                print(key)
+                break
+
+
 
     def plotHarmonics(self):
         frequencies = self.findPeaks()
@@ -58,4 +67,8 @@ class Decoder:
 decoder = Decoder()
 
 #decoder.plotFFT2()
+#decoder.plotHarmonics()
+print(decoder.findPeaks())
 decoder.plotHarmonics()
+#decoder.plotFFT2()
+decoder.findKeys()
