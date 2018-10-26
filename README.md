@@ -24,3 +24,5 @@ Turma 2018.2
 ### Projeto 7 - [DTMF](https://github.com/gabrielnoal/camada_fisica/tree/master/Projeto7)
 
 ![alt text](http://macao.communications.museum/images/exhibits/2_6_1_5_por.png)
+  
+### Projeto 8 - [Modulação e demodulação AM](https://github.com/gabrielnoal/camada_fisica/tree/master/Projeto7)
