@@ -85,19 +85,21 @@ class enlace(object):
         # print('entrou na leitura e tentara ler ' + str(size) )
         
         data = self.rx.getNData()
-        if data == 0:
+        if data == 0 or data is None:
             data = self.tx.createPACKAGE(0)
             messageType = self.checkMessageType(data,last_message)
         else:
             messageType = self.checkMessageType(data) #Verifica o tipo da mensagem no buffer
         payloadSize = 1
         if messageType == 4:
-            #print(data)
-            recievePack = data
-            CRC16, packageNumber, packageTotal, erro8, packageExpected, dataSize, data = self.rx.unpackage(recievePack)
-            self.checkAcknoledgement(CRC16,data, dataSize,packageNumber, packageTotal,packageExpected)
-            return data, len(data), dataSize
-
+            try:
+                recievePack = data
+                CRC16, packageNumber, packageTotal, erro8, packageExpected, dataSize, data = self.rx.unpackage(recievePack)
+                self.checkAcknoledgement(CRC16,data, dataSize,packageNumber, packageTotal,packageExpected)
+                return data, len(data), dataSize
+            except:
+                pass
+            
         
 
         return data, len(data), payloadSize
@@ -171,7 +173,7 @@ class enlace(object):
                 if timeout >= 5:
                     print("[ERRO] - Não recebimento da mensagem tipo 5 ou 6")
                     return
-                if self.mensagemTipo6["recebida"] == True:
+                if self.mensagemTipo8["recebida"] == True:
                     self.sendData(pack)
                     print("Pacote enviado novamente")
 
@@ -181,10 +183,11 @@ class enlace(object):
     def checkAcknoledgement(self, CRC16, data, payloadSize, packageNumber, packageTotal, packageExpected):
         print("Len data: {}  PayloadSize: {}".format(len(data), payloadSize))
         if len(data) == payloadSize:
-            #print("{} {}".format(packageNumber == self.packageExpected, packageNumber == packageTotal))
+            crc_isRight = self.rx.checkCRC16(data,CRC16)
+            print("CRC-16 HEADER: {}  CRC-16 CHECK: {}".format(CRC16,self.fisica.calculaCRC16(data)))
             if packageNumber == self.packageExpected:
                 if ((packageNumber < packageTotal) or (packageNumber == packageTotal)):
-                    if self.rx.checkCRC16(data,CRC16) == True:
+                    if crc_isRight == True:
                         self.packageExpected += 1
                         mensagemTipo5 = self.tx.createPACKAGE(5)
                         self.sendData(mensagemTipo5)
@@ -196,7 +199,11 @@ class enlace(object):
                         self.sendData(mensagemTipo9)
                         self.mensagemTipo9['enviada'] = True
                         print("Mensagem tipo 9 enviada")
-
+                else:
+                    mensagemTipo8 = self.tx.createPACKAGE(8,error8=1,packageExpected=packageExpected)
+                    self.sendData(mensagemTipo8)
+                    self.mensagemTipo8['enviada'] = True
+                    print("Mensagem tipo 8 enviada")
             else:
                 mensagemTipo8 = self.tx.createPACKAGE(8,error8=1,packageExpected=packageExpected)
                 self.sendData(mensagemTipo8)
